@@ -7,7 +7,7 @@
 //
 
 #import "CYCirculationScrollView.h"
-#import <Masonry.h>
+#import <Masonry/Masonry.h>
 #import <SDWebImage/UIImageView+WebCache.h>
 
 @interface CYCirculationScrollView ()<UIScrollViewDelegate>

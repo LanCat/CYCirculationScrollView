@@ -6,6 +6,6 @@ target 'CYScrollView' do
   # use_frameworks!
 
   # Pods for CYScrollView
-pod 'Masonry', '~> 1.0.1'
-pod 'SDWebImage', '~> 3.8.2'
+pod 'Masonry'
+pod 'SDWebImage'
 end
