@@ -8,4 +8,5 @@ target 'CYScrollView' do
   # Pods for CYScrollView
 pod 'Masonry'
 pod 'SDWebImage'
+pod 'CYScrollView', :git =>"https://github.com/ginkgocy/CYScrollView.git"
 end

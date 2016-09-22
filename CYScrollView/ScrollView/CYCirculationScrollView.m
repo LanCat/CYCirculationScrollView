@@ -10,6 +10,7 @@
 #import <Masonry/Masonry.h>
 #import <SDWebImage/UIImageView+WebCache.h>
 
+
 @interface CYCirculationScrollView ()<UIScrollViewDelegate>
 
 @property (nonatomic, assign) NSInteger currentPage;
@@ -19,10 +20,12 @@
 @property (nonatomic, assign) BOOL didAddImages;
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) NSMutableArray *imageNames;
-
 @end
 
 @implementation CYCirculationScrollView
+- (void) dealloc {
+    [_timer invalidate];
+}
 
 #pragma public methods
 - (instancetype)initWithImageNames:(NSArray<NSString *> *)imageNames isRepeatPlay:(BOOL)repeat {
@@ -35,19 +38,26 @@
             [_imageNames insertObject:tempImageName atIndex:0];
         }
         _repeat = repeat;
+        _currentPage = 1;
     }
     return self;
 }
 
-- (void)reloadDatas:(NSArray *)imageNames {
-    if (imageNames.count == 0) return;
-    _timer = nil;
+- (void)reloadImages:(NSArray *)imageNames {
+    if (_timer != nil) {
+        [_timer invalidate];
+        _timer = nil;
+    }
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    _imageNames = [NSMutableArray arrayWithArray:imageNames];
-    NSString *tempImageName = [imageNames firstObject];
-    [_imageNames addObject:tempImageName];
-    tempImageName = [imageNames lastObject];
-    [_imageNames insertObject:tempImageName atIndex:0];
+    if (imageNames.count > 0) {
+        _imageNames = [NSMutableArray arrayWithArray:imageNames];
+        NSString *tempImageName = [imageNames firstObject];
+        [_imageNames addObject:tempImageName];
+        tempImageName = [imageNames lastObject];
+        [_imageNames insertObject:tempImageName atIndex:0];
+    }
+    _currentPage = 1;
+    _didAddImages = NO;
     [self layoutSubviews];
 }
 
@@ -61,7 +71,6 @@
         if (_repeat) {
             [self start];
         }
-        
     }
 }
 
@@ -111,7 +120,6 @@
             make.width.equalTo(self.mas_width);
             make.height.equalTo(self.mas_height);
         }];
-        
         UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(scrollerViewDidClicked:)];
         [imageView addGestureRecognizer:tapGesture];
     }
@@ -154,6 +162,7 @@
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     self.currentPage = floor(scrollView.contentOffset.x /self.frame.size.width);
     self.pageControl.currentPage = floor(self.currentPage-1);
+    
     if ([self.scrollDelegate respondsToSelector:@selector(cy_scrollViewDidScroll:)]) {
         [self.scrollDelegate cy_scrollViewDidScroll:scrollView];
     }
@@ -184,6 +193,4 @@
         [self.scrollDelegate cy_scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
     }
 }
-
 @end
-

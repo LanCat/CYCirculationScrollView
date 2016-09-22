@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "CYScrollView"
-  s.version      = "0.0.1"
+  s.version      = "0.0.3"
   s.summary      = "方便使用的循环滚动的scrollview"
   s.description  = "循环滚动scrollview 轮播bannerview"
   s.homepage     = "https://github.com/ginkgocy/CYScrollView"

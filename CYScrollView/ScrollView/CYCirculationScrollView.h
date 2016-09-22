@@ -54,4 +54,6 @@
  *  @return
  */
 - (instancetype)initWithImageNames:(NSArray<NSString *> *)imageNames isRepeatPlay:(BOOL)repeat;
+
+- (void)reloadImages:(NSArray *)imageNames;
 @end
