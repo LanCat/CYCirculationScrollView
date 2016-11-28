@@ -20,6 +20,8 @@
 @property (nonatomic, assign) BOOL didAddImages;
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) NSMutableArray *imageNames;
+@property (assign) CGFloat pageControlOffsetCenterY;
+@property (assign) CGFloat pageControlOffsetCenterX;
 @end
 
 @implementation CYCirculationScrollView
@@ -39,6 +41,8 @@
         }
         _repeat = repeat;
         _currentPage = 1;
+        self.pageControlOffsetCenterY = 0;
+        self.pageControlOffsetCenterX = 0;
     }
     return self;
 }
@@ -61,6 +65,22 @@
     [self layoutSubviews];
 }
 
+- (void)setPageControlOffetX:(CGFloat)x {
+    self.pageControlOffsetCenterX = x;
+}
+
+- (void)setPageControlOffetY:(CGFloat)y {
+    self.pageControlOffsetCenterY = y;
+}
+
+- (void)setPageControlPageIndicatorTintColor:(UIColor *)color {
+    self.pageControl.pageIndicatorTintColor = color;
+}
+
+- (void)setPageControlCurrentPageIndicatorTintColor:(UIColor *)color {
+    self.pageControl.currentPageIndicatorTintColor = color;
+}
+
 - (void)layoutSubviews {
     [super layoutSubviews];
     //判断是否已经有frame，有了才进行布局
@@ -75,16 +95,13 @@
 }
 
 - (void)layouPageControl {
-    _pageControl = [[UIPageControl alloc]init];
-    _pageControl.numberOfPages = _imageNames.count - 2;
-    _pageControl.currentPage = 0;
-    _pageControl.pageIndicatorTintColor = [UIColor grayColor];
-    _pageControl.currentPageIndicatorTintColor = [UIColor whiteColor];
-    [self addSubview:_pageControl];
-    CGFloat bottom = self.bounds.size.height * 0.2;
-    [_pageControl mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.bottom.equalTo(@(-bottom));
-        make.centerX.equalTo(self.mas_centerX);
+    self.pageControl.numberOfPages = _imageNames.count - 2;
+    self.pageControl.currentPage = 1;
+    self.pageControl.hidesForSinglePage = YES;
+    [self addSubview:self.pageControl];
+    [self.pageControl mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(self.mas_bottom).offset(self.pageControlOffsetCenterY);
+        make.centerX.equalTo(self.mas_centerX).offset(self.pageControlOffsetCenterX);
     }];
 }
 
@@ -110,7 +127,7 @@
         }else {
             imageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:imageName]];
         }
-        [imageView setContentMode:UIViewContentModeScaleAspectFit];
+        //[imageView setContentMode:UIViewContentModeScaleToFill];
         imageView.tag = i;
         imageView.userInteractionEnabled = YES;
         [_scrollView addSubview:imageView];
@@ -192,5 +209,13 @@
     if ([self.scrollDelegate respondsToSelector:@selector(scrollViewDidEndDragging: willDecelerate:)]) {
         [self.scrollDelegate cy_scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
     }
+}
+
+#pragma mark- setter
+- (UIPageControl *)pageControl {
+    if (!_pageControl) {
+        self.pageControl = [[UIPageControl alloc]init];
+    }
+    return _pageControl;
 }
 @end

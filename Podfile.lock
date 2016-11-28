@@ -1,31 +1,17 @@
 PODS:
-  - CYScrollView (0.0.1):
-    - Masonry
-    - SDWebImage
   - Masonry (1.0.2)
   - SDWebImage (3.8.2):
     - SDWebImage/Core (= 3.8.2)
   - SDWebImage/Core (3.8.2)
 
 DEPENDENCIES:
-  - CYScrollView (from `https://github.com/ginkgocy/CYScrollView.git`)
   - Masonry
   - SDWebImage
 
-EXTERNAL SOURCES:
-  CYScrollView:
-    :git: https://github.com/ginkgocy/CYScrollView.git
-
-CHECKOUT OPTIONS:
-  CYScrollView:
-    :commit: 000e8f8fe194a0819a0a136f1dd816e9320ddc37
-    :git: https://github.com/ginkgocy/CYScrollView.git
-
 SPEC CHECKSUMS:
-  CYScrollView: ec0768f1c20e3b6b3fb791c59ea1ecb1e7640430
   Masonry: 7c429b56da9d4ee0bbb3ed77a5ea710d6a5df39e
   SDWebImage: 098e97e6176540799c27e804c96653ee0833d13c
 
-PODFILE CHECKSUM: 3f93d016fb23bd740cd6b2cb36af9dfb87449d0a
+PODFILE CHECKSUM: 0e8491eb86500d1a1b67fa96a9e3efb1e64b430b
 
 COCOAPODS: 1.1.0.rc.2

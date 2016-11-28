@@ -48,12 +48,22 @@
 /**
  *  通过需要显示的图片就行初始化
  *
- *  @param imageNames
+ *  @param imageNames 图片地址
  *  @param repeat     是否需要自动轮播
  *
  *  @return
  */
 - (instancetype)initWithImageNames:(NSArray<NSString *> *)imageNames isRepeatPlay:(BOOL)repeat;
 
+//刷新图片
 - (void)reloadImages:(NSArray *)imageNames;
+
+- (void)setPageControlOffetY:(CGFloat)y;
+
+- (void)setPageControlOffetX:(CGFloat)x;
+
+- (void)setPageControlPageIndicatorTintColor:(UIColor *)color;
+
+- (void)setPageControlCurrentPageIndicatorTintColor:(UIColor *)color;
+
 @end
