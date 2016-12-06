@@ -13,15 +13,19 @@
 
 @interface CYCirculationScrollView ()<UIScrollViewDelegate>
 
+@property (nonatomic, strong) UIView *contentView;
+
 @property (nonatomic, assign) NSInteger currentPage;
 @property (nonatomic, strong) UIPageControl *pageControl;
 @property (nonatomic, strong) NSTimer *timer;
-@property (nonatomic, assign) BOOL repeat;
-@property (nonatomic, assign) BOOL didAddImages;
-@property (nonatomic, strong) UIScrollView *scrollView;
-@property (nonatomic, strong) NSMutableArray *imageNames;
+@property (nonatomic, strong) NSMutableArray *images;
+@property (nonatomic, strong) UIScrollView *scrollview;
+@property (nonatomic, strong) NSArray *originImages;
+
 @property (assign) CGFloat pageControlOffsetCenterY;
 @property (assign) CGFloat pageControlOffsetCenterX;
+@property (assign) CYOffetDirection offectDirection;
+
 @end
 
 @implementation CYCirculationScrollView
@@ -30,96 +34,65 @@
 }
 
 #pragma public methods
-- (instancetype)initWithImageNames:(NSArray<NSString *> *)imageNames isRepeatPlay:(BOOL)repeat {
+- (instancetype)initWithImageNames:(NSArray<NSString *> *)imageNames autoScroll:(BOOL)autoScroll repeat:(BOOL)repeat{
     if (self = [super init]) {
-        if (imageNames.count > 0) {
-            _imageNames = [NSMutableArray arrayWithArray:imageNames];
-            NSString *tempImageName = [imageNames firstObject];
-            [_imageNames addObject:tempImageName];
-            tempImageName = [imageNames lastObject];
-            [_imageNames insertObject:tempImageName atIndex:0];
+        _originImages = imageNames;
+        _autoScroll = autoScroll;
+        if (self.unScrollWhenSinglePage && imageNames.count == 1) {
+            _autoScroll = NO;
         }
         _repeat = repeat;
         _currentPage = 1;
         self.pageControlOffsetCenterY = 0;
         self.pageControlOffsetCenterX = 0;
+        [self createPageView:imageNames];
     }
     return self;
 }
 
-- (void)reloadImages:(NSArray *)imageNames {
-    if (_timer != nil) {
-        [_timer invalidate];
-        _timer = nil;
+- (void)createPageView:(NSArray *)imageNames {
+    
+    if (imageNames.count == 0) {
+        return;
     }
-    [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    if (imageNames.count > 0) {
-        _imageNames = [NSMutableArray arrayWithArray:imageNames];
+    if (!_scrollview) {
+        self.scrollview = [UIScrollView new];
+        [self addSubview:_scrollview];
+        self.scrollview.showsHorizontalScrollIndicator = NO;
+        self.scrollview.showsVerticalScrollIndicator = NO;
+        self.scrollview.pagingEnabled = YES;
+        self.scrollview.delegate = self;
+    }
+    
+    
+    if (!_contentView) {
+        _contentView = [UIView new];
+        _contentView.backgroundColor = [UIColor clearColor];
+        [_scrollview addSubview:_contentView];
+    }
+    
+    NSMutableArray *imagesURLs = [imageNames mutableCopy];
+    if (self.unScrollWhenSinglePage && imageNames.count == 1) {
+        _autoScroll = NO;
+    }
+    if (imageNames.count == 1) {
+        _repeat = NO;
+    }
+    if (_repeat && imageNames.count >= 1) {
         NSString *tempImageName = [imageNames firstObject];
-        [_imageNames addObject:tempImageName];
+        [imagesURLs addObject:tempImageName];
         tempImageName = [imageNames lastObject];
-        [_imageNames insertObject:tempImageName atIndex:0];
+        [imagesURLs insertObject:tempImageName atIndex:0];
     }
-    _currentPage = 1;
-    _didAddImages = NO;
-    [self layoutSubviews];
-}
-
-- (void)setPageControlOffetX:(CGFloat)x {
-    self.pageControlOffsetCenterX = x;
-}
-
-- (void)setPageControlOffetY:(CGFloat)y {
-    self.pageControlOffsetCenterY = y;
-}
-
-- (void)setPageControlPageIndicatorTintColor:(UIColor *)color {
-    self.pageControl.pageIndicatorTintColor = color;
-}
-
-- (void)setPageControlCurrentPageIndicatorTintColor:(UIColor *)color {
-    self.pageControl.currentPageIndicatorTintColor = color;
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    //判断是否已经有frame，有了才进行布局
-    if (self.frame.size.width > 0 && !self.didAddImages) {
-        [self layoutImages];
-        [self layouPageControl];
-        self.didAddImages = YES;
-        if (_repeat) {
-            [self start];
-        }
+    
+    if (!_images) {
+        _images = [NSMutableArray arrayWithCapacity:imagesURLs.count];
     }
-}
-
-- (void)layouPageControl {
-    self.pageControl.numberOfPages = _imageNames.count - 2;
-    self.pageControl.currentPage = 1;
-    self.pageControl.hidesForSinglePage = YES;
-    [self addSubview:self.pageControl];
-    [self.pageControl mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.bottom.equalTo(self.mas_bottom).offset(self.pageControlOffsetCenterY);
-        make.centerX.equalTo(self.mas_centerX).offset(self.pageControlOffsetCenterX);
-    }];
-}
-
-#pragma mark - layoutSubviews
-- (void)layoutImages {
-    _scrollView = [UIScrollView new];
-    [self addSubview:_scrollView];
-    [_scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.equalTo(self);
-    }];
-    _scrollView.showsHorizontalScrollIndicator = NO;
-    _scrollView.showsVerticalScrollIndicator = NO;
-    _scrollView.pagingEnabled = YES;
-    _scrollView.delegate = self;
-    for (NSInteger i = 0; i < [_imageNames count]; i ++) {
+    [_images removeAllObjects];
+    for (NSInteger i = 0; i < [imagesURLs count]; i ++) {
         
-        NSString *imageName = [_imageNames objectAtIndex:i];
-        UIImageView *imageView;
+        NSString *imageName = [imagesURLs objectAtIndex:i];
+        UIImageView *imageView = [UIImageView new];
         
         if ([imageName hasPrefix:@"http://"] || [imageName hasPrefix:@"https://"]) {
             imageView = [[UIImageView alloc]init];
@@ -127,24 +100,108 @@
         }else {
             imageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:imageName]];
         }
-        //[imageView setContentMode:UIViewContentModeScaleToFill];
+        [imageView setContentMode:self.imageContentMode];
         imageView.tag = i;
         imageView.userInteractionEnabled = YES;
-        [_scrollView addSubview:imageView];
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(scrollerViewDidClicked:)];
+        [imageView addGestureRecognizer:tapGesture];
+        [_contentView addSubview:imageView];
+        [_images addObject:imageView];
+    }
+    
+    if (!_pageControl) {
+        _pageControl = [[UIPageControl alloc]init];
+        [self addSubview:_pageControl];
+    }
+    _pageControl.numberOfPages = imageNames.count;
+    _pageControl.currentPage = 1;
+    _pageControl.hidesForSinglePage = YES;
+    if (_autoScroll) {
+        [self start];
+    }else {
+        [self stop];
+    }
+}
+
+- (void)drawRect:(CGRect)rect {
+    [self.pageControl.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (self.pageIndicatorBorderColor) {
+            obj.layer.masksToBounds = YES;
+            [obj.layer setBorderColor:self.pageIndicatorBorderColor.CGColor];
+            [obj.layer setBorderWidth:1];
+        }
+    }];
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    UIImageView *lastImageView = nil;
+    for (UIImageView *imageView in _images) {
         [imageView mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.left.equalTo(@(i * self.bounds.size.width));
+            if (!lastImageView) {
+                make.left.mas_equalTo(0);
+            }else {
+                make.left.mas_equalTo(lastImageView.mas_right);
+            }
             make.top.equalTo(@0);
             make.width.equalTo(self.mas_width);
             make.height.equalTo(self.mas_height);
         }];
-        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(scrollerViewDidClicked:)];
-        [imageView addGestureRecognizer:tapGesture];
+        lastImageView = imageView;
     }
     
-    [_scrollView setContentSize:CGSizeMake(_imageNames.count * self.bounds.size.width, self.frame.size.height)
-     ];
-    [_scrollView setContentOffset:CGPointMake(self.frame.size.width, self.frame.size.height)];
+    [_scrollview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(self);
+        make.right.equalTo(_contentView.mas_right);
+        make.bottom.mas_equalTo(_contentView.mas_bottom);
+    }];
+    
+    [_pageControl mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(self.mas_bottom).offset(self.pageControlOffsetCenterY - 20);
+        switch (_offectDirection) {
+            case CYOffetLeft:
+                make.centerX.equalTo(self.mas_left).offset(self.pageControlOffsetCenterX).priorityHigh();
+                break;
+            case CYOffetRight:
+                make.centerX.equalTo(self.mas_right).offset(self.pageControlOffsetCenterX).priorityHigh();
+                break;
+            case CYOffetCenter:
+                make.centerX.equalTo(self.mas_centerX).offset(self.pageControlOffsetCenterX).priorityHigh();
+                break;
+            default:
+                make.centerX.equalTo(self.mas_centerX);
+
+                break;
+        }
+    }];
+    
+    [_contentView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.mas_equalTo(_scrollview);
+        make.right.mas_equalTo(lastImageView.mas_right);
+    }];
+    
+    [self mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.mas_equalTo(_scrollview.mas_bottom);
+    }];
 }
+
+- (void)reloadImages:(NSArray *)imageNames {
+    if (_timer != nil) {
+        [_timer invalidate];
+        _timer = nil;
+    }
+    [_contentView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    if (imageNames.count > 0) {
+        _originImages = imageNames;
+        [self createPageView:imageNames];
+        _currentPage = 1;
+        [self setNeedsLayout];
+        [self layoutIfNeeded];
+        [self setNeedsDisplay];
+    }
+    
+}
+
 
 #pragma mark- auto scroll
 - (void)start {
@@ -159,11 +216,11 @@
 
 - (void)startScroll {
     _currentPage ++;
-    if (_currentPage == [_imageNames count] - 1) {
+    if (_currentPage == [_images count] - 1) {
         _currentPage = 1;
-        [_scrollView scrollRectToVisible:CGRectMake(self.frame.size.width, 0, self.frame.size.width, self.frame.size.height) animated:NO];
+        [self.scrollview scrollRectToVisible:CGRectMake(self.frame.size.width, 0, self.frame.size.width, self.frame.size.height) animated:NO];
     }else {
-        [_scrollView scrollRectToVisible:CGRectMake(self.frame.size.width * _currentPage, 0, self.frame.size.width, self.frame.size.height) animated:YES];
+        [self.scrollview scrollRectToVisible:CGRectMake(self.frame.size.width * _currentPage, 0, self.frame.size.width, self.frame.size.height) animated:YES];
     }
 }
 
@@ -178,7 +235,7 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     self.currentPage = floor(scrollView.contentOffset.x /self.frame.size.width);
-    self.pageControl.currentPage = floor(self.currentPage-1);
+    self.pageControl.currentPage = _repeat ?floor(self.currentPage-1):self.currentPage;
     
     if ([self.scrollDelegate respondsToSelector:@selector(cy_scrollViewDidScroll:)]) {
         [self.scrollDelegate cy_scrollViewDidScroll:scrollView];
@@ -186,11 +243,13 @@
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    if (_currentPage == 0) {
-        [scrollView setContentOffset:CGPointMake((_imageNames.count - 2) * self.frame.size.width, 0)];
-    }
-    if(_currentPage == [_imageNames count] - 1){
-        [scrollView setContentOffset:CGPointMake(self.frame.size.width, 0)];
+    if (_repeat) {
+        if (_currentPage == 0) {
+            [scrollView setContentOffset:CGPointMake((_images.count - 2) * self.frame.size.width, 0)];
+        }
+        if(_currentPage == [_images count] - 1){
+            [scrollView setContentOffset:CGPointMake(self.frame.size.width, 0)];
+        }
     }
     if ([self.scrollDelegate respondsToSelector:@selector(cy_scrollViewDidEndDecelerating:)]) {
         [self.scrollDelegate cy_scrollViewDidEndDecelerating:scrollView];
@@ -198,24 +257,53 @@
 }
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
-    [self stop];
+    if (_autoScroll) {
+        [self stop];
+    }
     if ([self.scrollDelegate respondsToSelector:@selector(cy_scrollViewWillBeginDragging:)]) {
         [self.scrollDelegate cy_scrollViewWillBeginDragging:scrollView];
     }
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-    [self start];
+    if (_autoScroll) {
+        [self start];
+    }
     if ([self.scrollDelegate respondsToSelector:@selector(scrollViewDidEndDragging: willDecelerate:)]) {
         [self.scrollDelegate cy_scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
     }
 }
 
 #pragma mark- setter
-- (UIPageControl *)pageControl {
-    if (!_pageControl) {
-        self.pageControl = [[UIPageControl alloc]init];
-    }
-    return _pageControl;
+
+- (void)setPageControlOffetX:(CGFloat)x forDirection:(CYOffetDirection)direction {
+    self.pageControlOffsetCenterX = x;
+    _offectDirection = direction;
+    [self setNeedsLayout];
+    [self layoutIfNeeded];
+}
+
+- (void)setPageControlOffetY:(CGFloat)y {
+    self.pageControlOffsetCenterY = y;
+    [self setNeedsLayout];
+    [self layoutIfNeeded];
+}
+
+- (void)setPageControlPageIndicatorTintColor:(UIColor *)color {
+    self.pageControl.pageIndicatorTintColor = color;
+}
+
+- (void)setPageControlCurrentPageIndicatorTintColor:(UIColor *)color {
+    self.pageControl.currentPageIndicatorTintColor = color;
+}
+
+- (void)setUnScrollWhenSinglePage:(BOOL)unScrollWhenSinglePage {
+    _unScrollWhenSinglePage = unScrollWhenSinglePage;
+    [self reloadImages:_originImages];
+}
+
+- (void)setRepeat:(BOOL)repeat {
+    _repeat = repeat;
+    [self reloadImages:_originImages];
 }
 @end

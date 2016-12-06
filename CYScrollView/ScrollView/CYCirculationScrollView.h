@@ -7,6 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+typedef enum : NSUInteger {
+    CYOffetCenter,
+    CYOffetLeft,
+    CYOffetRight,
+} CYOffetDirection;
+
 
 @protocol CYCirculationScrollViewDelegate <NSObject>
 
@@ -14,13 +20,13 @@
 
 - (void)cy_scrollerViewDidClicked:(NSUInteger)index;
 
-- (void)cy_scrollViewDidScroll:(UIScrollView *)scrollView;
+- (void)cy_scrollViewDidScroll:(UIScrollView * _Nonnull)scrollView;
 
-- (void)cy_scrollViewDidEndDecelerating:(UIScrollView *)scrollView;
+- (void)cy_scrollViewDidEndDecelerating:(UIScrollView *_Nonnull)scrollView;
 
-- (void)cy_scrollViewWillBeginDragging:(UIScrollView *)scrollView;
+- (void)cy_scrollViewWillBeginDragging:(UIScrollView *_Nonnull)scrollView;
 
-- (void)cy_scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate;
+- (void)cy_scrollViewDidEndDragging:(UIScrollView *_Nonnull)scrollView willDecelerate:(BOOL)decelerate;
 
 @end
 
@@ -43,27 +49,37 @@
  *
  *  @since <#1.0#>
  */
-@property (nonatomic, weak) id<CYCirculationScrollViewDelegate> scrollDelegate;
+@property (nonatomic, weak) id <CYCirculationScrollViewDelegate> scrollDelegate;
 
+@property(nullable, nonatomic,strong) UIColor *pageIndicatorBorderColor;
+
+@property (nonatomic, assign) UIViewContentMode imageContentMode;
+
+@property (nonatomic, assign) BOOL unScrollWhenSinglePage; //单张图片是否滚动。默认不播放
+@property (nonatomic, assign) BOOL autoScroll;//是否自动播放
+@property (nonatomic, assign) BOOL repeat;//是否循坏播放
 /**
  *  通过需要显示的图片就行初始化
  *
  *  @param imageNames 图片地址
  *  @param repeat     是否需要自动轮播
- *
- *  @return
+ *  @param autoScroll 自动滚动
  */
-- (instancetype)initWithImageNames:(NSArray<NSString *> *)imageNames isRepeatPlay:(BOOL)repeat;
+- (_Nonnull instancetype)initWithImageNames:( NSArray<NSString *> *_Nonnull)imageNames autoScroll:(BOOL)autoScroll repeat:(BOOL)repeat;
 
 //刷新图片
-- (void)reloadImages:(NSArray *)imageNames;
+- (void)reloadImages:(NSArray *_Nonnull)imageNames;
 
+//pagecontrol Y方向上的偏移量 默认为距离底部20像素
 - (void)setPageControlOffetY:(CGFloat)y;
 
-- (void)setPageControlOffetX:(CGFloat)x;
+//pagecontrol X方向上的偏移量 默认 水平居中
+- (void)setPageControlOffetX:(CGFloat)x forDirection:(CYOffetDirection)direction;
 
-- (void)setPageControlPageIndicatorTintColor:(UIColor *)color;
+- (void)setPageControlPageIndicatorTintColor:( UIColor * _Nonnull )color;
 
-- (void)setPageControlCurrentPageIndicatorTintColor:(UIColor *)color;
+- (void)setPageControlCurrentPageIndicatorTintColor:(UIColor *_Nonnull)color;
+
+
 
 @end
