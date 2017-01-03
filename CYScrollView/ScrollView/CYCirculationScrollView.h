@@ -52,6 +52,7 @@ typedef enum : NSUInteger {
 @property (nonatomic, weak) id <CYCirculationScrollViewDelegate> scrollDelegate;
 
 @property(nullable, nonatomic,strong) UIColor *pageIndicatorBorderColor;
+@property (nonatomic, strong) UIScrollView *scrollview;
 
 @property (nonatomic, assign) UIViewContentMode imageContentMode;
 

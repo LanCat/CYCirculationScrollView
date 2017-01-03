@@ -19,7 +19,6 @@
 @property (nonatomic, strong) UIPageControl *pageControl;
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, strong) NSMutableArray *images;
-@property (nonatomic, strong) UIScrollView *scrollview;
 @property (nonatomic, strong) NSArray *originImages;
 
 @property (assign) CGFloat pageControlOffsetCenterY;
@@ -135,6 +134,9 @@
 
 - (void)layoutSubviews {
     [super layoutSubviews];
+    if (!_images.count) {
+        return;
+    }
     UIImageView *lastImageView = nil;
     for (UIImageView *imageView in _images) {
         [imageView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -178,6 +180,7 @@
     [_contentView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.mas_equalTo(_scrollview);
         make.right.mas_equalTo(lastImageView.mas_right);
+        make.height.mas_equalTo(self.mas_height);
     }];
     
     [self mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -229,8 +232,17 @@
     UIImageView *imageView = (UIImageView *)tapGesture.view;
     if ([self.scrollDelegate respondsToSelector:@selector(cy_scrollerViewDidClicked:)]) {
         NSLog(@"images did clicked at index: %zd",imageView.tag);
-        [self.scrollDelegate cy_scrollerViewDidClicked:imageView.tag];
+        NSInteger index = 0;
+        if (imageView.tag == 0) {
+            index = _images.count - 1;
+        }else if (imageView.tag == _images.count - 1) {
+            index = 0;
+        }else {
+            index = imageView.tag -1;
+        }
+        [self.scrollDelegate cy_scrollerViewDidClicked:index];
     }
+
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
@@ -305,5 +317,14 @@
 - (void)setRepeat:(BOOL)repeat {
     _repeat = repeat;
     [self reloadImages:_originImages];
+}
+
+- (void)setImageContentMode:(UIViewContentMode)imageContentMode {
+    _imageContentMode = imageContentMode;
+    if (_images.count > 0) {
+        [_images enumerateObjectsUsingBlock:^(UIImageView *obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            obj.contentMode = imageContentMode;
+        }];
+    }
 }
 @end

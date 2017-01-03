@@ -18,7 +18,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    CYCirculationScrollView *scrollView = [[CYCirculationScrollView alloc]initWithImageNames:@[@"1.jpg",@"2.jpg",@"3.jpg",@"4.jpg",@"5.jpg"] autoScroll:YES repeat:YES];
+    CYCirculationScrollView *scrollView = [[CYCirculationScrollView alloc]initWithImageNames:@[@"1",@"2",@"3"] autoScroll:YES repeat:YES];
+    scrollView.imageContentMode = UIViewContentModeScaleAspectFit;
     [self.view addSubview:scrollView];
     [scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);

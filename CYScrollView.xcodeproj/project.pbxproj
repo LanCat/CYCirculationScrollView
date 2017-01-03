@@ -15,6 +15,9 @@
 		4968153B1D92E02500A8F00D /* CYCirculationScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4968153A1D92E02500A8F00D /* CYCirculationScrollView.m */; };
 		AA4310CF074896BD2C415320 /* libPods-CYScrollView.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C689F63ED27236B740165F9 /* libPods-CYScrollView.a */; };
 		EF4D2CC51D93C4E800E46637 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EF4D2CC41D93C4E800E46637 /* ViewController.m */; };
+		EFFE42081E1B42FA003422F8 /* 1.png in Resources */ = {isa = PBXBuildFile; fileRef = EFFE42051E1B42FA003422F8 /* 1.png */; };
+		EFFE42091E1B42FA003422F8 /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = EFFE42061E1B42FA003422F8 /* 2.png */; };
+		EFFE420A1E1B42FA003422F8 /* 3.png in Resources */ = {isa = PBXBuildFile; fileRef = EFFE42071E1B42FA003422F8 /* 3.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +36,9 @@
 		D6002556AC07EFB2F245B6BF /* Pods-CYScrollView.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CYScrollView.release.xcconfig"; path = "Pods/Target Support Files/Pods-CYScrollView/Pods-CYScrollView.release.xcconfig"; sourceTree = "<group>"; };
 		EF4D2CC31D93C4E800E46637 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		EF4D2CC41D93C4E800E46637 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		EFFE42051E1B42FA003422F8 /* 1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 1.png; sourceTree = "<group>"; };
+		EFFE42061E1B42FA003422F8 /* 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 2.png; sourceTree = "<group>"; };
+		EFFE42071E1B42FA003422F8 /* 3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 3.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +74,9 @@
 		496815201D92DFE600A8F00D /* CYScrollView */ = {
 			isa = PBXGroup;
 			children = (
+				EFFE42051E1B42FA003422F8 /* 1.png */,
+				EFFE42061E1B42FA003422F8 /* 2.png */,
+				EFFE42071E1B42FA003422F8 /* 3.png */,
 				EF4D2CC31D93C4E800E46637 /* ViewController.h */,
 				EF4D2CC41D93C4E800E46637 /* ViewController.m */,
 				496815381D92E02500A8F00D /* ScrollView */,
@@ -178,6 +187,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				496815311D92DFE600A8F00D /* LaunchScreen.storyboard in Resources */,
+				EFFE42081E1B42FA003422F8 /* 1.png in Resources */,
+				EFFE42091E1B42FA003422F8 /* 2.png in Resources */,
+				EFFE420A1E1B42FA003422F8 /* 3.png in Resources */,
 				4968152E1D92DFE600A8F00D /* Assets.xcassets in Resources */,
 				4968152C1D92DFE600A8F00D /* Main.storyboard in Resources */,
 			);
