@@ -10,6 +10,7 @@
 #import <Masonry/Masonry.h>
 #import <SDWebImage/UIImageView+WebCache.h>
 
+CGFloat disPlayDuration = 2.0;
 
 @interface CYCirculationScrollView ()<UIScrollViewDelegate>
 
@@ -28,8 +29,12 @@
 @end
 
 @implementation CYCirculationScrollView
+{
+    BOOL _contentOffset;
+}
 - (void) dealloc {
     [_timer invalidate];
+    _timer = nil;
 }
 
 #pragma public methods
@@ -41,7 +46,6 @@
             _autoScroll = NO;
         }
         _repeat = repeat;
-        _currentPage = 1;
         self.pageControlOffsetCenterY = 0;
         self.pageControlOffsetCenterX = 0;
         [self createPageView:imageNames];
@@ -84,10 +88,14 @@
         [imagesURLs insertObject:tempImageName atIndex:0];
     }
     
+    _currentPage = 0;
+    _contentOffset = NO;
+    
     if (!_images) {
         _images = [NSMutableArray arrayWithCapacity:imagesURLs.count];
     }
     [_images removeAllObjects];
+    
     for (NSInteger i = 0; i < [imagesURLs count]; i ++) {
         
         NSString *imageName = [imagesURLs objectAtIndex:i];
@@ -113,7 +121,7 @@
         [self addSubview:_pageControl];
     }
     _pageControl.numberOfPages = imageNames.count;
-    _pageControl.currentPage = 1;
+    _pageControl.currentPage = 0;
     _pageControl.hidesForSinglePage = YES;
     if (_autoScroll) {
         [self start];
@@ -177,6 +185,9 @@
         }
     }];
     
+    if (!_contentOffset) {
+        [_scrollview setContentOffset:CGPointMake(self.frame.size.width, 0) animated:NO];
+    }
     [_contentView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.mas_equalTo(_scrollview);
         make.right.mas_equalTo(lastImageView.mas_right);
@@ -197,7 +208,6 @@
     if (imageNames.count > 0) {
         _originImages = imageNames;
         [self createPageView:imageNames];
-        _currentPage = 1;
         [self setNeedsLayout];
         [self layoutIfNeeded];
         [self setNeedsDisplay];
@@ -208,7 +218,7 @@
 
 #pragma mark- auto scroll
 - (void)start {
-    _timer = [NSTimer timerWithTimeInterval:5 target:self selector:@selector(startScroll) userInfo:nil repeats:YES];
+    _timer = [NSTimer timerWithTimeInterval:disPlayDuration target:self selector:@selector(startScroll) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSRunLoopCommonModes];
 }
 
@@ -326,5 +336,13 @@
             obj.contentMode = imageContentMode;
         }];
     }
+}
+
+- (void)setDisplayDuration:(CGFloat)duration {
+    if (duration > 0) {
+        disPlayDuration = duration;
+    }
+    [self stop];
+    [self start];
 }
 @end

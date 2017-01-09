@@ -81,6 +81,5 @@ typedef enum : NSUInteger {
 
 - (void)setPageControlCurrentPageIndicatorTintColor:(UIColor *_Nonnull)color;
 
-
-
+- (void)setDisplayDuration:(CGFloat)duration;
 @end
